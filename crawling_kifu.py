@@ -3,8 +3,12 @@ import re
 import time
 import requests
 from selenium import webdriver
+import os
 
+#url = 'https://shogidb2.com/strategy/%E7%9F%A2%E5%80%89/page/'
 url = 'https://shogidb2.com/strategy/%E7%9F%A2%E5%80%89/page/'
+strategy_name = "矢倉"
+pages = 2
 driver = webdriver.PhantomJS()
 print("Driver opened.")
 
@@ -18,10 +22,10 @@ def crawl_kifu_url(url, dpt):
             print("Depth: " + str(i))
             for kifu_url in kifu_urls:
                 k += 1
-                kifu = crawl_raw_kifu(kifu_url)
-                time.sleep(0.5)
-                writecsa(kifu, "test"+str(k))
-                print("Wrote test"+str(k)+".csa")
+                kifu, filename = crawl_raw_kifu(kifu_url)
+                time.sleep(5)
+                writecsa(kifu, filename)
+                print("Wrote "+filename)
         print("Finished!")
             
 
@@ -37,11 +41,36 @@ def crawl_raw_kifu(url):
     encoding = 'utf-8'
     text = f.read().decode(encoding)
     moves = re.search(r'\"moves\":\[.*\]', text)
+    title = re.search(r'\"tournament_detail\":.*\"tournament\"', text)
+    title = title.group(0)
+    title = title.split(",")
+    title = title[0]
+    title = title.split(":")
+    title = title[1][1:-1]
+
+    player1 = re.search(r'\"player1\":.*\"place\"', text)
+    player2 = re.search(r'\"player2\":.*\"player1\"', text)
+    player1 = player1.group(0)
+    player1 = player1.split(",")
+    player1 = player1[0]
+    player1 = player1.split(":")
+    player1 = player1[1][1:-1]
+
+    player2 = player2.group(0)
+    player2 = player2.split(",")
+    player2 = player2[0]
+    player2 = player2.split(":")
+    player2 = player2[1][1:-1]
+
+    filename = title + "_" + player1 + "_" + player2 + ".csa"
     kifu = [m.group(1) for m in re.finditer(r'\"csa\":\"(.*?)\",', moves.group(0))]
-    return kifu
+    return kifu, filename
 
 def writecsa(kifu, filename):
-    with open('./kifu/'+filename+'.csa', 'w') as f:
+    print("write " + filename)
+    mkdir('./棋譜')
+    mkdir('./棋譜/' + strategy_name)
+    with open('./棋譜/' + strategy_name + '/' +filename, 'w') as f:
         #csaファイル形式のバージョン
         version = 'V2.2\n'
         #開始局面の設定
@@ -55,4 +84,8 @@ def writecsa(kifu, filename):
 #url = 'https://shogidb2.com/games/ed9f7e5bb50c64376e49aee4dd30deec194a4618'
 #url = 'https://shogidb2.com/strategies'
 
-crawl_kifu_url(url, 2)
+def mkdir(path):
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
+crawl_kifu_url(url, pages)

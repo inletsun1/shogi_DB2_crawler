@@ -2,11 +2,11 @@
 将棋棋譜データベースサイトである[将棋DB2](https://shogidb2.com/)から戦型別に棋譜をダウンロードするツールです。
 保存形式は全て[csaファイル形式](http://www2.computer-shogi.org/protocol/record_v22.html)です。
 
-##確認した動作環境
+## 確認した動作環境
 Windows Subsytems for windows Ubuntu18.04
 Python3.7.3
 
-##使用するまでの準備
+## 使用するまでの準備
 Pythonのインストール(3.7.xを推奨)
 https://www.python.org/downloads/
 

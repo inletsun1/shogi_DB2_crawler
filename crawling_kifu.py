@@ -3,13 +3,23 @@ import re
 import time
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import os
 
 #url = 'https://shogidb2.com/strategy/%E7%9F%A2%E5%80%89/page/'
-url = 'https://shogidb2.com/strategy/%E7%9F%A2%E5%80%89/page/'
-strategy_name = "矢倉"
-pages = 2
-driver = webdriver.PhantomJS()
+print('インストール先のURLを貼り付けてください。')
+url = input()
+if not 'page' in url.split('/'):
+    url = os.path.join(url, 'page')
+print('戦法名（保存するフォルダ名）を指定してください。')
+strategy_name = input()
+print('指定したURL先のページ数を指定してください。')
+pages = int(input())
+
+options = Options()
+options.add_argument('--headless')
+
+driver = webdriver.Chrome(executable_path='/mnt/c/chromedriver.exe', chrome_options=options)
 print("Driver opened.")
 
 def crawl_kifu_url(url, dpt):
@@ -18,12 +28,12 @@ def crawl_kifu_url(url, dpt):
     else:
         k = 0
         for i in range(1, dpt+1):
-            kifu_urls = get_kifu_url(url + str(i))
+            kifu_urls = get_kifu_url(os.path.join(url,str(i)))
             print("Depth: " + str(i))
             for kifu_url in kifu_urls:
                 k += 1
                 kifu, filename = crawl_raw_kifu(kifu_url)
-                time.sleep(5)
+                time.sleep(2)
                 writecsa(kifu, filename)
                 print("Wrote "+filename)
         print("Finished!")
